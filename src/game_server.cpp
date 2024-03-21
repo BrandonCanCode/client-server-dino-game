@@ -58,8 +58,7 @@ int main(void)
 	int yes=1;
 	char s[INET6_ADDRSTRLEN];
 	int rv;
-	char recv_buff[MAXDATASIZE];
-	char *send_buff;
+	char recv_buff[MAXDATASIZE] = {'-'};
 	int num_bytes = 0;
 
 	//Setup Sockets
@@ -143,21 +142,23 @@ int main(void)
 			// this is the child process
 			close(sockfd); // child doesn't need the listener
 
-			//Receive from clients
-			if ((num_bytes = recv(new_fd, recv_buff, MAXDATASIZE-1, 0)) == -1) 
+			while (recv_buff[0] != 'q')
 			{
-				perror("recv");
-			}
-			else 
-			{
+				//Receive from clients
+				if ((num_bytes = recv(new_fd, recv_buff, MAXDATASIZE-1, 0)) == -1) 
+				{
+					perror("recv");
+				}
 				printf("Server received: %s\n", recv_buff);
 				
 				//Send what was received, back to the client
-				if (send(new_fd, recv_buff, strlen(recv_buff), 0) == -1)
+				if (send(new_fd, recv_buff, 1, 0) == -1)
 					perror("send");
+					
+				printf("Server sending: %s\n", recv_buff);
 			}
 
-			free(send_buff);
+			printf("Closing connection!\n");
 			close(new_fd);
 			exit(0);
 		}

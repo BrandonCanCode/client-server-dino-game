@@ -123,40 +123,52 @@ bool run(int &max_score) {
   mvwhline(game_wnd, screen_area.bot() - 5, 0, '_', screen_area.width() - 2);
   wrefresh(game_wnd);
 
+  //Start TCP client thread
+  std::thread clientThread(RunTCPClient);
+
   while (1) {
+    char out_char = 'a';
     in_char = wgetch(main_wnd);
     in_char = tolower(in_char);
 
     if (player.air_time == player.max_air_time && player.up) {
-      player.air_time = 0;
+      player.air_time = 0; 
       player.up = false;
 
       movePlayerDown(game_wnd, &player);
     }
 
-    switch (in_char) {
-    case KEY_UP:
-    case ' ':
-    case 'w':
-      if (!player.up) {
-        movePlayerUp(game_wnd, &player);
-        player.up = true;
-      }
-      break;
-    case KEY_DOWN:
-    case 's':
-      if (player.up) { /* Cancel jump */
-        player.air_time = 0;
-        player.up = false;
+    //Send Character to server
+    if (in_char == ' ' || in_char == 'w' || in_char == 's')
+    {
+      PushOutgoingQueue(in_char);
+    }
 
-        movePlayerDown(game_wnd, &player);
+    //Get data back from server
+    if(PopIncomingQueue(&out_char))
+    {
+      switch (out_char) {
+      case ' ':
+      case 'w':
+        if (!player.up) {
+          movePlayerUp(game_wnd, &player);
+          player.up = true;
+        }
+        break;
+      case 's':
+        if (player.up) { /* Cancel jump */
+          player.air_time = 0;
+          player.up = false;
+
+          movePlayerDown(game_wnd, &player);
+          break;
+        }
+
+        crouchPlayer(game_wnd, &player);
+        break;
+      default:
         break;
       }
-
-      crouchPlayer(game_wnd, &player);
-      break;
-    default:
-      break;
     }
 
     size_t p_length = player.disp_char.size();
@@ -209,8 +221,11 @@ bool run(int &max_score) {
       mvwprintw(game_wnd, 11, 29, "press 'q' to exit");
       mvwprintw(game_wnd, 12, 29, "press 'r' to retry");
       wrefresh(game_wnd);
+      PushOutgoingQueue('q'); //Close client and server
       usleep(50000); /* Gotta let the gamer read the info */
       flushinp();
+      clientThread.join();
+      
 
       while (1) {
       input = wgetch(game_wnd);

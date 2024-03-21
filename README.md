@@ -1,4 +1,4 @@
-![dino_gif](https://github.com/wldfngrs/chrome-dinosaur-terminal/blob/main/assets/dino.gif)
+![dino_gif](https://github.com/BrandonCanCode/client-server-dino-game.git/assets/dino.gif)
 # Dino
 This repository contains a rendering of the popular chrome dinosaur game on the terminal, in C++ and curses.
 
@@ -21,20 +21,20 @@ Arch Linux:
 
 To install this program, clone this repository onto your local machine using the following command:
 
-`$ git clone git@github.com:wldfngrs/chrome-dinosaur-terminal.git`
+`$ git clone https://github.com/BrandonCanCode/client-server-dino-game.git`
 
 Once you have cloned the repository, you can navigate to the repository directory.
 
-`$ cd chrome-dinosaur-terminal`
+`$ cd client-server-dino-game`
 
 You will need to create a directory where the build files will be placed, preferably outside the project repository tree, and run the CMake command to generate the build system as follows:
 
-`$ mkdir ../chrome-dinosaur-terminal-build `
-`$ cmake -B ../chrome-dinosaur-terminal-build `
+`$ mkdir ../client-server-dino-game-build`
+`$ cmake -B ../client-server-dino-game-build`
 
 In order to compile the program you will need to run the following command:
 
-`$ cmake --build ../chrome-dinosaur-terminal-build`
+`$ cmake --build ../client-server-dino-game-build`
 
 To Run the game, the build system should create a link to the running binary in the current directory so you should be able to run the game with the following command:
 

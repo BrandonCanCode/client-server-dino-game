@@ -14,6 +14,12 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <signal.h>
+#include <ncurses.h>
 
-int GetServerInput(char *input);
-void AddToOutgoingQueue(char value);
+void RunTCPClient();
+int PopIncomingQueue(char *input);
+int PopOutgoingQueue(char *value);
+void PushIncomingQueue(char value);
+void PushOutgoingQueue(char value);
+
+extern WINDOW *main_wnd;

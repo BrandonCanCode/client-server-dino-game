@@ -9,7 +9,8 @@
 
 
 #define PORT "3490" // the port client will be connecting to 
-#define HOSTNAME "11.1.1.1"
+#define HOSTNAME "localhost"
+#define MAXDATASIZE 64
 
 std::queue<char> incoming_queue;
 std::queue<char> outgoing_queue;
@@ -21,7 +22,7 @@ int sockfd;
 /* Used by game.cpp
  * Test without locks to prevent any blocking
 */
-int GetServerInput(char *input) 
+int PopIncomingQueue(char *input) 
 {
     //std::unique_lock<std::mutex> lock(i_mtx);
 	if (!incoming_queue.empty()) 
@@ -38,33 +39,28 @@ int GetServerInput(char *input)
 	}
 }
 
-void AddToIncomingQueue(char value)
+void PushIncomingQueue(char value)
 {
     //std::unique_lock<std::mutex> lock(i_mtx);
 	incoming_queue.push(value);
 	//lock.unlock();
 }
 
-void AddToOutgoingQueue(char value)
+void PushOutgoingQueue(char value)
 {
 	outgoing_queue.push(value);
 }
 
-int GetOutgoingValue(char *value) 
+int PopOutgoingQueue(char *value) 
 {
     //std::unique_lock<std::mutex> lock(i_mtx);
-	if (!outgoing_queue.empty()) 
-	{
-		*value = outgoing_queue.front();
-		outgoing_queue.pop();
-		//lock.unlock(); // Unlock mutex before processing data
-		return 1;
-	} 
-	else 
-	{
-		//lock.unlock();
+	if (outgoing_queue.empty())
 		return 0;
-	}
+	
+	*value = outgoing_queue.front();
+	outgoing_queue.pop();
+	//lock.unlock(); // Unlock mutex before processing data
+	return 1;
 }
 
 
@@ -95,6 +91,9 @@ void RunTCPClient()
 	int rv;
 	char s[INET6_ADDRSTRLEN];
 	char data;
+	char recv_buff[MAXDATASIZE] = {'1'};
+
+    mvwprintw(main_wnd, 25, 0, "Starting TCP Client");
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -131,30 +130,38 @@ void RunTCPClient()
 	}
 
 	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
-	printf("client: connecting to %s\n", s);
+    mvwprintw(main_wnd, 25, 0, "Client: connecting to %s\n", s);
 
 	freeaddrinfo(servinfo); // all done with this structure
 	
-	while(1)
+	while(recv_buff[0] != 'q')
 	{
 		//Send Data
 		//Check for data
-		if(GetOutgoingValue(&data))
+		if(PopOutgoingQueue(&data))
 		{
+    		//mvwprintw(game_wnd, 1, 0, "Sending %c to server\n", data);
 			if (send(sockfd, &data, 1, 0) == -1)
 				perror("send");
 
 			
 			//Recv Data
-			if ((numbytes = recv(sockfd, &data, 1, 0)) == -1) 
+			if ((numbytes = recv(sockfd, &recv_buff, MAXDATASIZE, 0)) == -1) 
 			{
 				perror("recv");
 				exit(1);
 			}
+    		mvwprintw(main_wnd, 40, 0, "Client received: %c (%d)",data, numbytes);
 
-			AddToIncomingQueue(data);
-			printf("client received: %c (%d)",data, numbytes);
+			if (numbytes > 0)
+				PushIncomingQueue(recv_buff[0]);
 		}
 	}
+
+	mvwprintw(main_wnd, 25, 0, "Closing client thread!         ");
+	mvwprintw(main_wnd, 25, 0, "                               ");
+	return;
 }
+
+
 
