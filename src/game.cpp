@@ -15,7 +15,7 @@ rect game_area;
 rect screen_area;
 rect dirt_area;
 
-extern std::condition_variable cv;
+extern char *HOSTNAME;
 
 bool isCollided(rect a, rect b) {
   bool a1 = (a.top() < b.bot() - b.top());
@@ -125,6 +125,8 @@ bool run(int &max_score) {
 
   //Start TCP client thread
   std::thread clientThread(RunTCPClient);
+  int send_count = 0;
+  int recv_count = 0;
 
   while (1) {
     char out_char = 'a';
@@ -141,12 +143,16 @@ bool run(int &max_score) {
     //Send Character to server
     if (in_char == ' ' || in_char == 'w' || in_char == 's')
     {
+      mvwprintw(game_wnd, 1, 0, "Client sent:     %c [%d Total]", (char)in_char, ++send_count);
       PushOutgoingQueue(in_char);
     }
 
     //Get data back from server
     if(PopIncomingQueue(&out_char))
     {
+      if (out_char != 'q')
+    	  mvwprintw(game_wnd, 2, 0, "Client received: %c [%d Total]", out_char, ++recv_count);
+
       switch (out_char) {
       case ' ':
       case 'w':
@@ -221,10 +227,11 @@ bool run(int &max_score) {
       mvwprintw(game_wnd, 11, 29, "press 'q' to exit");
       mvwprintw(game_wnd, 12, 29, "press 'r' to retry");
       wrefresh(game_wnd);
-      PushOutgoingQueue('q'); //Close client and server
+      PushOutgoingQueue('q'); //close_win client and server
       usleep(50000); /* Gotta let the gamer read the info */
       flushinp();
-      clientThread.join();
+      if (clientThread.joinable() )
+        clientThread.join();
       
 
       while (1) {
@@ -248,6 +255,7 @@ bool run(int &max_score) {
       player.score += 1;
     }
 
+	  mvwprintw(game_wnd, 0, 0, "Client connecting to: %s", HOSTNAME);
     mvwprintw(game_wnd, 0, 58, "HIGH SCORE: %8d", max_score);
     mvwprintw(game_wnd, 1, 55, "CURRENT SCORE: %8d", player.score);
     wrefresh(game_wnd);
@@ -265,4 +273,4 @@ bool run(int &max_score) {
   }
 }
 
-void close() { endwin(); }
+void close_win() { endwin(); }

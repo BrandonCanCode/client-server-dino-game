@@ -12,6 +12,8 @@
 #define MAXDATASIZE 64
 
 extern char *HOSTNAME;
+extern void close_win();
+
 std::queue<char> incoming_queue;
 std::queue<char> outgoing_queue;
 std::mutex i_mtx;
@@ -93,16 +95,15 @@ void RunTCPClient()
 	char data;
 	char recv_buff[MAXDATASIZE] = {'1'};
 
-    mvwprintw(main_wnd, 25, 0, "Starting TCP Client");
-
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
 	if ((rv = getaddrinfo(HOSTNAME, PORT, &hints, &servinfo)) != 0) 
 	{
+		close_win();
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		return;
+		exit(1);
 	}
 
 	// loop through all the results and connect to the first we can
@@ -110,27 +111,30 @@ void RunTCPClient()
 	{
 		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) 
 		{
+			close_win();
 			perror("client: socket");
-			continue;
+			exit(1);
 		}
 
 		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) 
 		{
+			close_win();
 			perror("client: connect");
 			close(sockfd);
-			continue;
+			exit(1);
 		}
 
 		break;
 	}
 
-	if (p == NULL) {
+	if (p == NULL) 
+	{
+		close_win();
 		fprintf(stderr, "client: failed to connect\n");
-		return;
+		exit(1);
 	}
 
 	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
-    mvwprintw(main_wnd, 25, 0, "Client: connecting to %s\n", s);
 
 	freeaddrinfo(servinfo); // all done with this structure
 	
@@ -142,24 +146,25 @@ void RunTCPClient()
 		{
     		//mvwprintw(game_wnd, 1, 0, "Sending %c to server\n", data);
 			if (send(sockfd, &data, 1, 0) == -1)
+			{
+				close_win();
 				perror("send");
+				exit(1);
+			}
 
 			
 			//Recv Data
 			if ((numbytes = recv(sockfd, &recv_buff, MAXDATASIZE, 0)) == -1) 
 			{
+				close_win();
 				perror("recv");
 				exit(1);
 			}
-    		mvwprintw(main_wnd, 40, 0, "Client received: %c (%d)",data, numbytes);
 
 			if (numbytes > 0)
 				PushIncomingQueue(recv_buff[0]);
 		}
 	}
-
-	mvwprintw(main_wnd, 25, 0, "Closing client thread!         ");
-	mvwprintw(main_wnd, 25, 0, "                               ");
 	return;
 }
 

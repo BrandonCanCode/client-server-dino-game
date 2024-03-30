@@ -21,5 +21,3 @@ int PopIncomingQueue(char *input);
 int PopOutgoingQueue(char *value);
 void PushIncomingQueue(char value);
 void PushOutgoingQueue(char value);
-
-extern WINDOW *main_wnd;

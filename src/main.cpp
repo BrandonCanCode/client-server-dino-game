@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	close();
+	close_win();
 
 	return 0;
 }
