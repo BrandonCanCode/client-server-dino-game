@@ -9,9 +9,9 @@
 
 
 #define PORT "3490" // the port client will be connecting to 
-#define HOSTNAME "localhost"
 #define MAXDATASIZE 64
 
+extern char *HOSTNAME;
 std::queue<char> incoming_queue;
 std::queue<char> outgoing_queue;
 std::mutex i_mtx;
