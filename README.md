@@ -1,4 +1,4 @@
-![dino_gif](https://github.com/BrandonCanCode/client-server-dino-game.git/assets/dino.gif)
+![dino_gif](https://github.com/BrandonCanCode/client-server-dino-game/blob/master/assets/dino.gif)
 # Dino
 This repository contains a rendering of the popular chrome dinosaur game on the terminal, in C++ and curses.
 This project has been modified from the original to work as a client and server application.
