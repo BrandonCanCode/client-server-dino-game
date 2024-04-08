@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra
-LDFLAGS = -lncurses
+LDFLAGS = -lncurses -lpthread
 
 all: dinosaur_game server
 
