@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	else
 	{
 		int length = strlen(argv[1]);
-		if (length < 9)
+		if (length < 4)
 		{
 			printf("IP address too small\n");
 			return 1;
