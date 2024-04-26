@@ -65,6 +65,13 @@ int PopOutgoingQueue(char *value)
 	return 1;
 }
 
+void ClearBuffers()
+{
+	char trash;
+	while(PopOutgoingQueue(&trash));
+	while(PopIncomingQueue(&trash));
+}
+
 
 
 // get sockaddr, IPv4 or IPv6:

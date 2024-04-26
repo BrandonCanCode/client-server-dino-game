@@ -128,6 +128,9 @@ bool run(int &max_score) {
   int send_count = 0;
   int recv_count = 0;
 
+  //Empty TCP buffers
+  ClearBuffers();
+
   while (1) {
     char out_char = 'a';
     in_char = wgetch(main_wnd);
